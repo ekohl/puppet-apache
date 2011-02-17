@@ -5,7 +5,7 @@ class apache::reverseproxy {
 
 	file { "reverseproxy.conf":
 		ensure  => "present",
-		path    => "${apache::params::conf}/conf.d/reverseproxy.conf",
+		path    => "${apache::params::confdir}/conf.d/reverseproxy.conf",
 		content => "# file managed by puppet
 <IfModule mod_proxy.c>
   ProxyRequests Off

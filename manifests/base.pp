@@ -11,7 +11,7 @@ class apache::base {
 	include apache::params
 
 	file { "root directory":
-		path    => $apache::params::root,
+		path    => $apache::params::rootdir,
 		ensure  => directory,
 		mode    => 755,
 		owner   => root,
@@ -20,7 +20,7 @@ class apache::base {
 	}
 
 	file { "cgi-bin directory":
-		path    => $apache::params::cgi,
+		path    => $apache::params::cgidir,
 		ensure  => directory,
 		mode    => 755,
 		owner   => root,
@@ -29,7 +29,7 @@ class apache::base {
 	}
 
 	file { "log directory":
-		path    => $apache::params::log,
+		path    => $apache::params::logdir,
 		ensure  => directory,
 		mode    => 755,
 		owner   => root,
@@ -45,22 +45,22 @@ class apache::base {
 	}
 
 	group { "apache group":
-		name    => $apache::params::user,
+		name    => $apache::params::group,
 		ensure  => present,
 		require => Package["apache"]
 	}
 
 	package { "apache":
-		name   => $apache::params::pkg,
+		name   => $apache::params::pkgname,
 		ensure => installed
 	}
 
 	service { "apache":
-		name       => $apache::params::pkg,
+		name       => $apache::params::servicename,
 		ensure     => running,
 		enable     => true,
 		hasrestart => true,
-		require    => Package["apache"],
+		require    => Package["apache"]
 	}
 
 	file {"logrotate configuration":

@@ -15,7 +15,7 @@ class apache::awstats {
 	}
 
 	case $operatingsystem {
-		Debian,Ubuntu: {
+		/(?i)(Debian|Ubuntu)/: {
 			cron { "update all awstats virtual hosts":
 				command => "/usr/share/doc/awstats/examples/awstats_updateall.pl -awstatsprog=/usr/lib/cgi-bin/awstats.pl -confdir=/etc/awstats now > /dev/null",
 				user    => root,
@@ -27,7 +27,7 @@ class apache::awstats {
 				ensure => absent,
 			}
 		}
-		RedHat,CentOS: {
+		/(?i)(RedHat|CentOS)/: {
 			# awstats RPM installs its own cron in /etc/cron.hourly/awstats
 			file { "/usr/share/awstats/wwwroot/cgi-bin/":
 				seltype => "httpd_sys_script_exec_t",

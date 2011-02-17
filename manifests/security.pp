@@ -1,6 +1,6 @@
 class apache::security {
 	case $operatingsystem {
-		RedHat,CentOS: {
+		/(?i)(RedHat|CentOS)/: {
 			package { "mod_security":
 				ensure => present,
 				alias  => "apache-mod_security"
@@ -17,7 +17,7 @@ class apache::security {
 				notify  => Exec["apache-graceful"]
 			}
 		}
-		Debian: {
+		/(?i)(Debian|Ubuntu)/: {
 			package { "libapache-mod-security":
 				ensure => present,
 				alias  => "apache-mod_security"

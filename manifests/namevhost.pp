@@ -26,7 +26,7 @@ define apache::namevhost ($ensure=present) {
 		ensure  => $ensure,
 		manage  => true,
 		content => "NameVirtualHost ${name}\n",
-		file    => "${apache::params::conf}/ports.conf",
+		file    => "${apache::params::confdir}/ports.conf",
 		require => Package["apache"],
 		notify  => Service["apache"]
 	}

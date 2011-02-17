@@ -40,8 +40,8 @@ define apache::redirectmatch ($ensure=present, $regex, $url, $filename="", $vhos
 			default               => undef
 		},
 		name    => $filename ? {
-			""      => "${apache::params::root}/${vhost}/conf/redirect-${fname}.conf",
-			default => "${apache::params::root}/${vhost}/conf/${filename}"
+			""      => "${apache::params::rootdir}/${vhost}/conf/redirect-${fname}.conf",
+			default => "${apache::params::rootdir}/${vhost}/conf/${filename}"
 		},
 		notify  => Exec["apache-graceful"],
 		require => Apache::Vhost[$vhost]

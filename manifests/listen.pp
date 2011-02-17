@@ -23,7 +23,7 @@ define apache::listen ($ensure=present) {
 		ensure  => $ensure,
 		manage  => true,
 		content => "Listen ${name}\n",
-		file    => "${apache::params::conf}/ports.conf",
+		file    => "${apache::params::confdir}/ports.conf",
 		require => Package["apache"],
 		notify  => Service["apache"]
 	}

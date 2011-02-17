@@ -13,12 +13,12 @@ class apache::debian inherits apache::base {
 	}
 
 	File["default status module configuration"] {
-		path   => "${apache::params::conf}/mods-available/status.conf",
+		path   => "${apache::params::confdir}/mods-available/status.conf",
 		source => "puppet:///modules/apache/etc/apache2/mods-available/status.conf"
 	}
 
 	File["default virtualhost"] {
-   		path    => "${apache::params::conf}/sites-available/default",
+   		path    => "${apache::params::confdir}/sites-available/default",
    		content => template("apache/default-vhost.debian")
 	}
 	# END inheritance from apache::base
@@ -29,20 +29,20 @@ class apache::debian inherits apache::base {
 	}
 
 	# directory not present in lenny
-	file { "${apache::params::root}/apache2-default":
+	file { "${apache::params::rootdir}/apache2-default":
 		ensure => absent,
 		force  => true
 	}
 
-	file { "${apache::params::root}/index.html":
+	file { "${apache::params::rootdir}/index.html":
 		ensure => absent
 	}
 
- 	file { "${apache::params::root}/html":
+ 	file { "${apache::params::rootdir}/html":
 		ensure  => directory
 	}
 
-	file { "${apache::params::root}/html/index.html":
+	file { "${apache::params::rootdir}/html/index.html":
 		ensure  => present,
 		owner   => root,
 		group   => root,
@@ -50,13 +50,13 @@ class apache::debian inherits apache::base {
 		content => "<html><body><h1>It works!</h1></body></html>\n"
 	}
 
-	file { "${apache::params::conf}/conf.d/servername.conf":
+	file { "${apache::params::confdir}/conf.d/servername.conf":
 		content => "ServerName ${fqdn}\n",
 		notify  => Service["apache"],
 		require => Package["apache"]
 	}
 
-	file { "${apache::params::conf}/sites-available/default-ssl":
+	file { "${apache::params::confdir}/sites-available/default-ssl":
 		ensure => absent,
 		force  => true
 	}

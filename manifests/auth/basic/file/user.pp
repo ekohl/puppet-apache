@@ -3,14 +3,14 @@ define apache::auth::basic::file::user ($ensure=present, $authname="Private Area
 
 	$fname = regsubst($name, "\s", "_", "G")
 
-	if defined(Apache::Module["authn_file"]) {} else {
+	if !defined(Apache::Module["authn_file"]) {
 		apache::module {"authn_file": }
 	}
 
 	if $authUserFile {
 		$_authUserFile = $authUserFile
 	} else {
-		$_authUserFile = "${apache::params::root}/${vhost}/private/htpasswd"
+		$_authUserFile = "${apache::params::rootdir}/${vhost}/private/htpasswd"
 	}
 
 	if $users != "valid-user" {
@@ -19,9 +19,9 @@ define apache::auth::basic::file::user ($ensure=present, $authname="Private Area
 		$_users = $users
 	}
 
-	file {"${apache::params::root}/${vhost}/conf/auth-basic-file-user-${fname}.conf":
+	file { "${apache::params::rootdir}/${vhost}/conf/auth-basic-file-user-${fname}.conf":
 		ensure  => $ensure,
-		content => template("apache/auth-basic-file-user.erb"),
+		content => template("apache/auth/basic/file/user.erb"),
 		seltype => $operatingsystem ? {
 			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 			default               => undef

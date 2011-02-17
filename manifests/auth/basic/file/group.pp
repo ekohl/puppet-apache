@@ -3,25 +3,25 @@ define apache::auth::basic::file::group ($ensure=present, $authname="Private Are
 	
 	$fname = regsubst($name, "\s", "_", "G")
 
-	if defined(Apache::Module["authn_file"]) {} else {
-		apache::module {"authn_file": }
+	if !defined(Apache::Module["authn_file"]) {
+		apache::module { "authn_file": }
 	}
 
 	if $authUserFile {
 		$_authUserFile = $authUserFile
 	} else {
-		$_authUserFile = "${apache::params::root}/${vhost}/private/htpasswd"
+		$_authUserFile = "${apache::params::rootdir}/${vhost}/private/htpasswd"
 	}
 
 	if $authGroupFile {
 		$_authGroupFile = $authGroupFile
 	} else {
-		$_authGroupFile = "${apache::params::root}/${vhost}/private/htgroup"
+		$_authGroupFile = "${apache::params::rootdir}/${vhost}/private/htgroup"
 	}
 
-	file { "${apache::params::root}/${vhost}/conf/auth-basic-file-group-${fname}.conf":
+	file { "${apache::params::rootdir}/${vhost}/conf/auth-basic-file-group-${fname}.conf":
 		ensure  => $ensure,
-		content => template("apache/auth-basic-file-group.erb"),
+		content => template("apache/auth/basic/file/group.erb"),
 		seltype => $operatingsystem ? {
 			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 			default               => undef

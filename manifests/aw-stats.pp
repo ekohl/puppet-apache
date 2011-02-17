@@ -7,10 +7,7 @@ define apache::aw-stats($ensure=present) {
 		require => [ Package["apache"], Class["apache::awstats"] ]
 	}
 
-	# used in ERB template
-	$wwwroot = $apache::params::root
-
-	file { "${apache::params::root}/${name}/conf/awstats.conf":
+	file { "${apache::params::rootdir}/${name}/conf/awstats.conf":
 		ensure  => $ensure,
 		owner   => root,
 		group   => root,

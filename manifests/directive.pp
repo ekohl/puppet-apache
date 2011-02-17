@@ -49,8 +49,8 @@ define apache::directive ($ensure=present, $directive="", $filename="", $vhost) 
 			default  => undef
 		},
 		name    => $filename ? {
-			""      => "${apache::params::root}/${vhost}/conf/directive-${fname}.conf",
-			default => "${apache::params::root}/${vhost}/conf/${filename}"
+			""      => "${apache::params::rootdir}/${vhost}/conf/directive-${fname}.conf",
+			default => "${apache::params::rootdir}/${vhost}/conf/${filename}"
 		},
 		notify  => Service["apache"],
 		require => Apache::Vhost[$vhost]

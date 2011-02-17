@@ -1,7 +1,7 @@
 define apache::userdirinstance ($ensure=present, $vhost) {
 	include apache::params
 
-	file { "${apache::params::root}/${vhost}/conf/userdir.conf":
+	file { "${apache::params::rootdir}/${vhost}/conf/userdir.conf":
 		ensure  => $ensure,
 		source  => 'puppet:///modules/apache/userdir.conf',
 		seltype => $operatingsystem ? {

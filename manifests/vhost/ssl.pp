@@ -108,28 +108,25 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 		default => $user
 	}
 
-	# used in ERB templates
-	$wwwroot = $apache::params::root
-
 	$documentroot = $docroot ? {
-		false   => "${wwwroot}/${name}/htdocs",
+		false   => "${apache::params::rootdir}/${name}/htdocs",
 		default => $docroot
 	}
 
 	$cgipath = $cgibin ? {
-		true    => "${wwwroot}/${name}/cgi-bin/",
+		true    => "${apache::params::rootdir}/${name}/cgi-bin/",
 		false   => false,
 		default => $cgibin
 	}
 
 	# define variable names used in vhost-ssl.erb template
-	$certfile      = "${apache::params::root}/$name/ssl/$name.crt"
-	$certkeyfile   = "${apache::params::root}/$name/ssl/$name.key"
-	$csrfile       = "${apache::params::root}/$name/ssl/$name.csr"
+	$certfile      = "${apache::params::rootdir}/${name}/ssl/${name}.crt"
+	$certkeyfile   = "${apache::params::rootdir}/${name}/ssl/${name}.key"
+	$csrfile       = "${apache::params::rootdir}/${name}/ssl/${name}.csr"
 
 	# By default, use CA certificate list shipped with the distribution.
 	if $cacert != false {
-		$cacertfile = "${apache::params::root}/$name/ssl/cacert.crt"
+		$cacertfile = "${apache::params::rootdir}/${name}/ssl/cacert.crt"
 	} else {
 		$cacertfile = $operatingsystem ? {
 			/(?i)(Debian|Ubuntu)/ => "/etc/ssl/certs/ca-certificates.crt",
@@ -138,7 +135,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 	}
 
 	if $certchain != false {
-		$certchainfile = "${apache::params::root}/$name/ssl/certchain.crt"
+		$certchainfile = "${apache::params::rootdir}/${name}/ssl/certchain.crt"
 	}
 
 	# call parent definition to actually do the virtualhost setup.
@@ -147,8 +144,8 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 		config_file    => $config_file,
 		config_content => $config_content ? {
 			false   => $sslonly ? {
-				true    => template("apache/vhost-ssl.erb"),
-				default => template("apache/vhost.erb", "apache/vhost-ssl.erb")
+				true    => template("apache/vhost/ssl.erb"),
+				default => template("apache/vhost.erb", "apache/vhost/ssl.erb")
 			},
 			default => $config_content
 		},
@@ -166,7 +163,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 	}
 
 	if $ensure == "present" {
-		file { "${apache::params::root}/${name}/ssl":
+		file { "${apache::params::rootdir}/${name}/ssl":
 			ensure  => directory,
 			owner   => root,
 			group   => root,
@@ -175,26 +172,26 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 				/(?i)(RedHat|CentOS)/ => "cert_t",
 				default               => undef
 			},
-			require => File["${apache::params::root}/${name}"]
+			require => File["${apache::params::rootdir}/${name}"]
 		}
 
 		# template file used to generate SSL key, cert and csr.
-		file { "${apache::params::root}/${name}/ssl/ssleay.cnf":
+		file { "${apache::params::rootdir}/${name}/ssl/ssleay.cnf":
 			ensure  => present,
 			owner   => root,
 			mode    => 0640,
 			content => template("apache/ssleay.cnf.erb"),
-			require => File["${apache::params::root}/${name}/ssl"]
+			require => File["${apache::params::rootdir}/${name}/ssl"]
 		}
 
 		# The certificate and the private key will be generated only if $name.crt
 		# or $name.key are absent from the "ssl/" subdir.
 		# The CSR will be re-generated each time this resource is triggered.
 		exec { "generate-ssl-cert-$name":
-			command => "/usr/local/sbin/generate-ssl-cert.sh ${name} ${apache::params::root}/${name}/ssl/ssleay.cnf ${apache::params::root}/${name}/ssl/ ${days}",
+			command => "/usr/local/sbin/generate-ssl-cert.sh ${name} ${apache::params::rootdir}/${name}/ssl/ssleay.cnf ${apache::params::rootdir}/${name}/ssl/ ${days}",
 			creates => $csrfile,
 			notify  => Exec["apache-graceful"],
-			require => [ File["${apache::params::root}/${name}/ssl/ssleay.cnf"], File["/usr/local/sbin/generate-ssl-cert.sh"] ]
+			require => [ File["${apache::params::rootdir}/${name}/ssl/ssleay.cnf"], File["/usr/local/sbin/generate-ssl-cert.sh"] ]
 		}
 
 		# The virtualhost's certificate.
@@ -213,7 +210,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 				default               => undef
 			},
 			notify  => Exec["apache-graceful"],
-			require => [ File["${apache::params::root}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
+			require => [ File["${apache::params::rootdir}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
 		}
 
 		# The virtualhost's private key.
@@ -232,7 +229,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 				default               => undef
 			},
 			notify  => Exec["apache-graceful"],
-			require => [ File["${apache::params::root}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
+			require => [ File["${apache::params::rootdir}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
 		}
 
 		if $cacert != false {
@@ -248,7 +245,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 					default               => undef
 				},
 				notify  => Exec["apache-graceful"],
-				require => File["${apache::params::root}/${name}/ssl"]
+				require => File["${apache::params::rootdir}/${name}/ssl"]
 			}
 		}
 
@@ -266,7 +263,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 					default               => undef
 				},
 				notify  => Exec["apache-graceful"],
-				require => File["${apache::params::root}/${name}/ssl"]
+				require => File["${apache::params::rootdir}/${name}/ssl"]
 			}
 		}
 
@@ -278,8 +275,8 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 				default => present
 			},
 			path    => $publish_csr ? {
-				true    => "${apache::params::root}/${name}/htdocs/${name}.csr",
-				false   => "${apache::params::root}/${name}/htdocs/${name}.csr",
+				true    => "${apache::params::rootdir}/${name}/htdocs/${name}.csr",
+				false   => "${apache::params::rootdir}/${name}/htdocs/${name}.csr",
 				default => $publish_csr
 			},
 			source  => "file://$csrfile",

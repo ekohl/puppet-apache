@@ -52,8 +52,8 @@ define apache::proxypass ($ensure=present, $location="", $url="", $filename="", 
 			default               => undef
 		},
 		name    => $filename ? {
-			""      => "${apache::params::root}/${vhost}/conf/proxypass-${fname}.conf",
-			default => "${apache::params::root}/${vhost}/conf/${filename}"
+			""      => "${apache::params::rootdir}/${vhost}/conf/proxypass-${fname}.conf",
+			default => "${apache::params::rootdir}/${vhost}/conf/${filename}"
 		},
 		notify  => Exec["apache-graceful"],
 		require => Apache::Vhost[$vhost]
