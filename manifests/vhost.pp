@@ -46,9 +46,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => root,
 				mode    => 644,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_config_t",
-					CentOS  => "httpd_config_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+					default               => undef
 				},
 				require => Package[$apache::params::pkg],
 				notify  => Exec["apache-graceful"]
@@ -60,9 +59,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => root,
 				mode    => 755,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_sys_content_t",
-					CentOS  => "httpd_sys_content_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+					default               => undef
 				},
 				require => File["root directory"]
 			}
@@ -76,9 +74,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => $group,
 				mode    => $mode,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_config_t",
-					CentOS  => "httpd_config_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}"]
 			}
@@ -89,9 +86,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => $group,
 				mode    => $mode,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_sys_content_t",
-					CentOS  => "httpd_sys_content_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}"]
 			}
@@ -124,9 +120,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => $group,
 				mode    => $mode,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_sys_script_exec_t",
-					CentOS  => "httpd_sys_script_exec_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_sys_script_exec_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}"]
 			}
@@ -158,9 +153,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => root,
 				mode    => 755,
 				seltype => $operatingsystem ? {
-					redhat => "httpd_log_t",
-					CentOS => "httpd_log_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}"]
 			}
@@ -173,9 +167,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => adm,
 				mode    => 644,
 				seltype => $operatingsystem ? {
-					redhat  => "httpd_log_t",
-					CentOS  => "httpd_log_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}/logs"]
 			}
@@ -187,9 +180,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				group   => $group,
 				mode    => $mode,
 				seltype => $operatingsystem ? {
-					redhat => "httpd_sys_content_t",
-					CentOS => "httpd_sys_content_t",
-					default => undef
+					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+					default               => undef
 				},
 				require => File["${apache::params::root}/${name}"]
 			}
@@ -215,9 +207,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				},
 				notify  => Exec["apache-graceful"],
 				require => [$operatingsystem ? {
-					redhat  => File["/usr/local/sbin/a2ensite"],
-					CentOS  => File["/usr/local/sbin/a2ensite"],
-					default => Package[$apache::params::pkg]
+					/(?i)(RedHat|CentOS)/ => File["/usr/local/sbin/a2ensite"],
+					default               => Package[$apache::params::pkg]
 				},
 					File["${apache::params::conf}/sites-available/${name}"],
 					File["${apache::params::root}/${name}/htdocs"],
@@ -245,15 +236,13 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 
 			exec { "disable vhost ${name}":
 				command => $operatingsystem ? {
-					RedHat  => "/usr/local/sbin/a2dissite ${name}",
-					CentOS  => "/usr/local/sbin/a2dissite ${name}",
-					default => "/usr/sbin/a2dissite ${name}"
+					/(?i)(RedHat|CentOS)/ => "/usr/local/sbin/a2dissite ${name}",
+					default               => "/usr/sbin/a2dissite ${name}"
 				},
 				notify  => Exec["apache-graceful"],
 				require => $operatingsystem ? {
-					redhat  => File["/usr/local/sbin/a2ensite"],
-					CentOS  => File["/usr/local/sbin/a2ensite"],
-					default => Package[$apache::params::pkg]
+					/(?i)(RedHat|CentOS)/  => File["/usr/local/sbin/a2ensite"],
+					default                => Package[$apache::params::pkg]
 				},
 				onlyif => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
 			}

@@ -36,9 +36,8 @@ define apache::redirectmatch ($ensure=present, $regex, $url, $filename="", $vhos
 		ensure  => $ensure,
 		content => "# file managed by puppet\nRedirectMatch ${regex} ${url}\n",
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		name    => $filename ? {
 			""      => "${apache::params::root}/${vhost}/conf/redirect-${fname}.conf",

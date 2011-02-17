@@ -12,21 +12,20 @@ define apache::webdav::instance ($ensure=present, $vhost, $directory=false) {
 			present => directory,
 			absent  => absent
 		},
-		owner => "www-data",
-		group => "www-data",
-		mode => 2755
+		owner  => "www-data",
+		group  => "www-data",
+		mode   => 2755
 	}
 
 	# configuration
 	file { "${apache::params::root}/${vhost}/conf/webdav-${name}.conf":
-		ensure => $ensure,
+		ensure  => $ensure,
 		content => template("apache/webdav-config.erb"),
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		require => File[$davdir],
-		notify => Exec["apache-graceful"]
+		notify  => Exec["apache-graceful"]
 	}
 }

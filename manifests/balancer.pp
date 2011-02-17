@@ -78,8 +78,7 @@ define apache::balancer ($ensure="present", $location="", $proto="http", $member
 		ensure  => $ensure,
 		content => template("apache/balancer.erb"),
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 			default  => undef
 		},
 		name    => $filename ? {

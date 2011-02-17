@@ -1,31 +1,32 @@
 class apache::params {
 	$pkg = $operatingsystem ? {
-		/RedHat|CentOS/ => 'httpd',
-		/Debian|Ubuntu/ => 'apache2'
+		/(?i)(Debian|Ubuntu)/ => 'apache2',
+		/(?i)(RedHat|CentOS)/ => 'httpd'
 	}
 
 	$root = $operatingsystem ? {
-		/RedHat|CentOS/ => '/var/www/vhosts',
-		/Debian|Ubuntu/ => '/var/www'
+		/(?i)(Debian|Ubuntu)/ => '/var/www',
+		/(?i)(RedHat|CentOS)/ => '/var/www/vhosts'
 	}
 
 	$user = $operatingsystem ? {
-		/RedHat|CentOS/ => 'apache',
-		/Debian|Ubuntu/ => 'www-data'
+		/(?i)(Debian|Ubuntu)/ => 'www-data',
+		/(?i)(RedHat|CentOS)/ => 'apache'
+		
 	}
 
 	$conf = $operatingsystem ? {
-		/RedHat|CentOS/ => '/etc/httpd',
-		/Debian|Ubuntu/ => '/etc/apache2'
+		/(?i)(Debian|Ubuntu)/ => '/etc/apache2',
+		/(?i)(RedHat|CentOS)/ => '/etc/httpd'
 	}
 
 	$cgi = $operatingsystem ? {
-		/RedHat|CentOS/ => '/var/www/cgi-bin',
-		/Debian|Ubuntu/ => '/usr/lib/cgi-bin'
+		/(?i)(Debian|Ubuntu)/ => '/usr/lib/cgi-bin',
+		/(?i)(RedHat|CentOS)/ => '/var/www/cgi-bin'
 	}
 
 	$log = $operatingsystem ? {
-		/RedHat|CentOS/ => '/var/log/httpd',
-		/Debian|Ubuntu/ => '/var/log/apache2'
+		/(?i)(Debian|Ubuntu)/ => '/var/log/apache2',
+		/(?i)(RedHat|CentOS)/ => '/var/log/httpd'
 	}
 }

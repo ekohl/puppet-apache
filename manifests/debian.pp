@@ -14,7 +14,7 @@ class apache::debian inherits apache::base {
 
 	File["default status module configuration"] {
 		path   => "${apache::params::conf}/mods-available/status.conf",
-		source => "puppet:///apache/etc/apache2/mods-available/status.conf"
+		source => "puppet:///modules/apache/etc/apache2/mods-available/status.conf"
 	}
 
 	File["default virtualhost"] {

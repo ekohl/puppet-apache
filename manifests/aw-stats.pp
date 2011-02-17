@@ -15,13 +15,12 @@ define apache::aw-stats($ensure=present) {
 		owner   => root,
 		group   => root,
 		source  => $operatingsystem ? {
-			/RedHat|CentOS/ => "puppet:///apache/awstats.rh.conf",
-			/Debian|Ubuntu/ => "puppet:///apache/awstats.deb.conf"
+			/(?i)(RedHat|CentOS)/ => "puppet:///modules/apache/awstats.rh.conf",
+			/(?i)(Debian|Ubuntu)/ => "puppet:///modules/apache/awstats.deb.conf"
 		},
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		notify  => Exec["apache-graceful"],
 		require => Apache::Vhost[$name]

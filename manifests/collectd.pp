@@ -18,7 +18,7 @@ Usage:
 
 */
 class apache::collectd {
-	if ($operatingsystem == "RedHat" or $operatingsystem == "CentOS") and $lsbmajdistrelease > "4" {
+	if ( $operatingsystem =~ /(?i)(RedHat|CentOS)/ ) and $lsbmajdistrelease > "4" {
 		package { "collectd-apache":
 			ensure => present,
 			before => Collectd::Plugin["apache"]

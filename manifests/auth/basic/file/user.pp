@@ -23,9 +23,8 @@ define apache::auth::basic::file::user ($ensure=present, $authname="Private Area
 		ensure  => $ensure,
 		content => template("apache/auth-basic-file-user.erb"),
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		notify => Exec["apache-graceful"]
 	}

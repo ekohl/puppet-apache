@@ -91,7 +91,7 @@ Example usage:
   }
 
 */
-define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
+define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
 						  $user="", $admin=$admin, $group="root", $mode=2570, $aliases=[], $ip_address="*", $cert=false, $certkey=false, $cacert=false, $certchain=false,
 						  $certcn=false, $days="3650", $publish_csr=false, $sslonly=false, $enable_default=true, $ports=['*:80'], $sslports=['*:443']) {
 	include apache::params
@@ -132,8 +132,8 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 		$cacertfile = "${apache::params::root}/$name/ssl/cacert.crt"
 	} else {
 		$cacertfile = $operatingsystem ? {
-			RedHat => "/etc/pki/tls/certs/ca-bundle.crt",
-			Debian => "/etc/ssl/certs/ca-certificates.crt"
+			/(?i)(Debian|Ubuntu)/ => "/etc/ssl/certs/ca-certificates.crt",
+			/(?i)(RedHat|CentOS)/ => "/etc/pki/tls/certs/ca-bundle.crt"
 		}
 	}
 
@@ -146,11 +146,11 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 		ensure         => $ensure,
 		config_file    => $config_file,
 		config_content => $config_content ? {
-			false => $sslonly ? {
-				true => template("apache/vhost-ssl.erb"),
+			false   => $sslonly ? {
+				true    => template("apache/vhost-ssl.erb"),
 				default => template("apache/vhost.erb", "apache/vhost-ssl.erb")
 			},
-			default      => $config_content
+			default => $config_content
 		},
 		aliases        => $aliases,
 		htdocs         => $htdocs,
@@ -171,7 +171,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 			owner   => root,
 			group   => root,
 			mode    => 700,
-			seltype => "cert_t",
+			seltype => $operatingsystem ? {
+				/(?i)(RedHat|CentOS)/ => "cert_t",
+				default               => undef
+			},
 			require => File["${apache::params::root}/${name}"]
 		}
 
@@ -205,7 +208,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 				false   => undef,
 				default => $cert
 			},
-			seltype => "cert_t",
+			seltype => $operatingsystem ? {
+				/(?i)(RedHat|CentOS)/ => "cert_t",
+				default               => undef
+			},
 			notify  => Exec["apache-graceful"],
 			require => [ File["${apache::params::root}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
 		}
@@ -221,7 +227,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 				false   => undef,
 				default => $certkey
 			},
-			seltype => "cert_t",
+			seltype => $operatingsystem ? {
+				/(?i)(RedHat|CentOS)/ => "cert_t",
+				default               => undef
+			},
 			notify  => Exec["apache-graceful"],
 			require => [ File["${apache::params::root}/${name}/ssl"], Exec["generate-ssl-cert-${name}"] ]
 		}
@@ -234,7 +243,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 				group   => root,
 				mode    => 640,
 				source  => $cacert,
-				seltype => "cert_t",
+				seltype => $operatingsystem ? {
+					/(?i)(RedHat|CentOS)/ => "cert_t",
+					default               => undef
+				},
 				notify  => Exec["apache-graceful"],
 				require => File["${apache::params::root}/${name}/ssl"]
 			}
@@ -249,7 +261,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 				group   => root,
 				mode    => 640,
 				source  => $certchain,
-				seltype => "cert_t",
+				seltype => $operatingsystem ? {
+					/(?i)(RedHat|CentOS)/ => "cert_t",
+					default               => undef
+				},
 				notify  => Exec["apache-graceful"],
 				require => File["${apache::params::root}/${name}/ssl"]
 			}
@@ -269,7 +284,10 @@ define apache::vhost-ssl ($ensure=present, $config_file="", $config_content=fals
 			},
 			source  => "file://$csrfile",
 			mode    => 640,
-			seltype => "httpd_sys_content_t",
+			seltype => $operatingsystem ? {
+				/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+				default               => undef
+			},
 			require => Exec["generate-ssl-cert-$name"]
 		}
 	}

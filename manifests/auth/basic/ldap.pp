@@ -18,9 +18,8 @@ define apache::auth::basic::ldap ($ensure=present,  $authname="Private Area", $v
 		ensure  => $ensure,
 		content => template("apache/auth-basic-ldap.erb"),
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		notify => Exec["apache-graceful"]
 	}

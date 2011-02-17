@@ -15,8 +15,8 @@ Example usage:
 */
 class apache {
 	case $operatingsystem {
-		Debian,Ubuntu:  { include apache::debian}
-		RedHat,CentOS:  { include apache::redhat}
+		/(?i)(Debian,Ubuntu)/:  { include apache::debian }
+		/(?i)(RedHat|CentOS)/:  { include apache::redhat }
 		default: { notice "Unsupported operatingsystem ${operatingsystem}" }
 	}
 }

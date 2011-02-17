@@ -23,9 +23,8 @@ define apache::auth::basic::file::group ($ensure=present, $authname="Private Are
 		ensure  => $ensure,
 		content => template("apache/auth-basic-file-group.erb"),
 		seltype => $operatingsystem ? {
-			"RedHat" => "httpd_config_t",
-			"CentOS" => "httpd_config_t",
-			default  => undef
+			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+			default               => undef
 		},
 		notify => Exec["apache-graceful"]
 	}
