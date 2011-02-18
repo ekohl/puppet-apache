@@ -30,9 +30,5 @@ Example usage:
 
 */
 class apache::ssl inherits apache {
-	case $operatingsystem {
-		/(?i)(Debian,Ubuntu)/:  { include apache::ssl::debian }
-		/(?i)(RedHat|CentOS)/:  { include apache::ssl::redhat }
-		default: { notice "Unsupported operatingsystem ${operatingsystem}" }
-	}
+	include apache::ssl::install, apache::ssl::config
 }

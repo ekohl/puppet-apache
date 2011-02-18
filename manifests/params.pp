@@ -1,13 +1,11 @@
 class apache::params {
-	$pkgname = $operatingsystem ? {
+	$basename = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'apache2',
 		/(?i)(RedHat|CentOS)/ => 'httpd'
 	}
 	
-	$servicename = $operatingsystem ? {
-		/(?i)(Debian|Ubuntu)/ => 'apache2',
-		/(?i)(RedHat|CentOS)/ => 'httpd'
-	}
+	$pkgname     = $basename
+	$servicename = $basename
 
 	$rootdir = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/var/www',
@@ -41,9 +39,14 @@ class apache::params {
 		/(?i)(RedHat|CentOS)/ => '/var/log/httpd'
 	}
 	
+	$apachectl = $operatingsystem ? {
+		/(?i)(Debian|Ubuntu)/ => 'apache2ctl',
+		/(?i)(RedHat|CentOS)/ => 'apachectl'
+	}
+	
 	$distro_specific_sudo = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => "/usr/sbin/apache2ctl",
-		/(?i)(RedHat|CentOS)/ => "/usr/sbin/apachectl, /sbin/service ${pkgname}"
+		/(?i)(RedHat|CentOS)/ => "/usr/sbin/apachectl, /sbin/service ${basename}"
 	}
 	
 	$sudo_admin_user = $apache_sudo_admin_user ? {
