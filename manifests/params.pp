@@ -55,7 +55,7 @@ class apache::params {
 	}
 	
 	$sudo_admin_cmnd = $apache_sudo_admin_cmnd ? {
-		""      => "/etc/init.d/${pkgname}, /bin/su ${user}, /bin/su - ${user}, ${distro_specific_sudo %>"
+		""      => "/etc/init.d/${pkgname}, /bin/su ${user}, /bin/su - ${user}, ${distro_specific_sudo}",
 		default => $apache_sudo_admin_cmnd
 	}
 }

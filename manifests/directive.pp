@@ -43,7 +43,7 @@ define apache::directive ($ensure=present, $directive="", $filename="", $vhost) 
 
 	file{ "${name} directive on ${vhost}":
 		ensure  => $ensure,
-		content => "# file managed by puppet\n${directive}\n",
+		content => template("apache/directive.erb"),
 		seltype => $operatingsystem ? {
 			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 			default  => undef
@@ -52,7 +52,7 @@ define apache::directive ($ensure=present, $directive="", $filename="", $vhost) 
 			""      => "${apache::params::rootdir}/${vhost}/conf/directive-${fname}.conf",
 			default => "${apache::params::rootdir}/${vhost}/conf/${filename}"
 		},
-		notify  => Service["apache"],
+		notify  => Class["apache::service"],
 		require => Apache::Vhost[$vhost]
 	}
 }

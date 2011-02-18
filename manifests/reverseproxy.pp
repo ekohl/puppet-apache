@@ -6,16 +6,8 @@ class apache::reverseproxy {
 	file { "reverseproxy.conf":
 		ensure  => "present",
 		path    => "${apache::params::confdir}/conf.d/reverseproxy.conf",
-		content => "# file managed by puppet
-<IfModule mod_proxy.c>
-  ProxyRequests Off
-  <Proxy *>
-    Order Deny,Allow
-    Deny from all
-  </Proxy>
-</IfModule>
-",
+		source  => "puppet:///modules/apache/reverseproxy.conf",
 		notify  => Exec["apache-graceful"],
-		require => Package["apache"]
+		require => Class["apache::install"]
 	}
 }

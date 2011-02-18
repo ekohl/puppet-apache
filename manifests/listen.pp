@@ -22,9 +22,9 @@ define apache::listen ($ensure=present) {
 	common::concatfilepart { "apache-ports.conf-${name}":
 		ensure  => $ensure,
 		manage  => true,
-		content => "Listen ${name}\n",
+		content => template("apache/listen.erb"),
 		file    => "${apache::params::confdir}/ports.conf",
-		require => Package["apache"],
-		notify  => Service["apache"]
+		require => Class["apache::install"],
+		notify  => Class["apache::service"]
 	}
 }

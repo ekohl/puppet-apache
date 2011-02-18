@@ -8,13 +8,8 @@ class apache::deflate {
 	file { "deflate.conf":
 		ensure  => present,
 		path    => "${apache::params::confdir}/conf.d/deflate.conf",
-		content => "# file managed by puppet
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE application/x-javascript application/javascript text/css
-  BrowserMatch Safari/4 no-gzip
-</IfModule>
-",
+		source  => "puppet:///modules/apache/deflate.conf",
 		notify  => Exec["apache-graceful"],
-		require => Package["apache"]
+		require => Class["apache::install"]
 	}
 }

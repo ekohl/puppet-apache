@@ -13,19 +13,19 @@ class apache::install {
 	user { $apache::params::user:
 		ensure  => present,
 		shell   => "/bin/sh",
-		require => Package["apache"]
+		require => Package[$apache::params::pkgname]
 	}
 
 	group { $apache::params::group:
 		ensure  => present,
-		require => Package["apache"]
+		require => Package[$apache::params::pkgname]
 	}
 	
 	case $operatingsystem {
 		/(?i)(Debian|Ubuntu)/: {
 			package { "apache2-mpm-prefork":
 				ensure  => installed,
-				require => Package["apache"]
+				require => Package[$apache::params::pkgname]
 			}
 		}
 		/(?i)(RedHat|CentOS)/: {

@@ -44,8 +44,8 @@ class apache::awstats {
 
 			file { "/etc/httpd/conf.d/awstats.conf":
 				ensure  => absent,
-				require => Package["awstats"],
 				notify  => Exec["apache-graceful"],
+				require => Package["awstats"]
 			}
 		}
 		default: {

@@ -25,9 +25,9 @@ define apache::namevhost ($ensure=present) {
 	common::concatfilepart { "apache-namevhost.conf-${name}":
 		ensure  => $ensure,
 		manage  => true,
-		content => "NameVirtualHost ${name}\n",
+		content => template("apache/namevhost.erb"),
 		file    => "${apache::params::confdir}/ports.conf",
-		require => Package["apache"],
-		notify  => Service["apache"]
+		require => Class["apache::install"],
+		notify  => Class["apache::service"]
 	}
 }

@@ -85,7 +85,7 @@ class apache::config {
 		seltype => $operatingsystem ? {
 			/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 			default               => undef
-		}
+		},
 		notify  => Exec["apache-graceful"]
 	}
 
