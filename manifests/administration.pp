@@ -5,10 +5,12 @@ class apache::administration {
 		ensure => present
 	}
 
-	common::concatfilepart { "sudoers.apache":
-		ensure  => present,
-		file    => "/etc/sudoers",
-		content => template("apache/sudoers.apache.erb"),
+	# This requires /etc/sudoers to be already setup to use with concat module
+	# TODO: move /etc/sudoers concat setup to a common module
+	concat::fragment { "sudoers.apache":
+		target  => "/etc/sudoers",
+		order   => 20,
+		content => template("apache/sudoers.erb"),
 		require => Group["apache-admin"]
 	}
 }

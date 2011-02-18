@@ -201,9 +201,8 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 
 			exec { "enable vhost ${name}":
 				command => $operatingsystem ? {
-					RedHat  => "/usr/local/sbin/a2ensite ${name}",
-					CentOS  => "/usr/local/sbin/a2ensite ${name}",
-					default => "/usr/sbin/a2ensite ${name}"
+					/(?i)(RedHat|CentOS)/ => "/usr/local/sbin/a2ensite ${name}",
+					default               => "/usr/sbin/a2ensite ${name}"
 				},
 				notify  => Exec["apache-graceful"],
 				require => [$operatingsystem ? {

@@ -16,7 +16,7 @@ class apache::ssl::config {
 	}
 	
 	case $operatingsystem {
-		/(?i)(Debian,Ubuntu)/: {
+		/(?i)(Debian|Ubuntu)/: {
 			apache::module { "ssl":
 				ensure => present
 			}

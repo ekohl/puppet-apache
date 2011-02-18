@@ -2,6 +2,9 @@
 #
 #
 class apache::config {
+	# Setup concat module
+	include concat::setup
+	
 	File {
 		require => Class["apache::install"]
 	}
@@ -39,6 +42,20 @@ class apache::config {
 		command     => "${apache::params::apachectl} graceful",
 		refreshonly => true,
 		onlyif      => "${apache::params::apachectl} configtest"
+	}
+	
+	# Setup node config file for concat module and include first fragment
+	concat { "${apache::params::confdir}/ports.conf":
+		owner   => root,
+		group   => root,
+		require => Class["apache::install"],
+		notify  => Class["apache::service"]
+	}
+	
+	concat::fragment { "apache-ports.conf-base":
+		target  => "${apache::params::confdir}/ports.conf",
+		order   => 10,
+		content => "#file managed by puppet\n"
 	}
 
 	apache::listen {

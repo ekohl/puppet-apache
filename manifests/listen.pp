@@ -19,12 +19,9 @@ Example usage:
 define apache::listen ($ensure=present) {
 	include apache::params
 
-	common::concatfilepart { "apache-ports.conf-${name}":
-		ensure  => $ensure,
-		manage  => true,
-		content => template("apache/listen.erb"),
-		file    => "${apache::params::confdir}/ports.conf",
-		require => Class["apache::install"],
-		notify  => Class["apache::service"]
+	concat::fragment { "apache-ports.conf-${name}":
+		target  => "${apache::params::confdir}/ports.conf",
+		order   => 20,
+		content => template("apache/listen.erb")
 	}
 }
