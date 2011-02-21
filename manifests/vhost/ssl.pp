@@ -91,7 +91,7 @@ Example usage:
   }
 
 */
-define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
+define apache::vhost::ssl ($ensure=present, $config_file="", $managed=true, $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
 						  $user="", $admin=$admin, $group="root", $mode=2570, $aliases=[], $ip_address="*", $cert=false, $certkey=false, $cacert=false, $certchain=false,
 						  $certcn=false, $days="3650", $publish_csr=false, $sslonly=false, $enable_default=true, $ports=['*:80'], $sslports=['*:443']) {
 	include apache::params
@@ -142,6 +142,7 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $config_content=fal
 	apache::vhost {$name:
 		ensure         => $ensure,
 		config_file    => $config_file,
+		managed        => $managed,
 		config_content => $config_content ? {
 			false   => $sslonly ? {
 				true    => template("apache/vhost/ssl.erb"),

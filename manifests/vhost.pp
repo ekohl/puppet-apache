@@ -1,4 +1,4 @@
-define apache::vhost ($ensure=present, $config_file="", $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
+define apache::vhost ($ensure=present, $config_file="", $managed=true, $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
 					  $user="", $admin="", $group="root", $mode=2570, $aliases=[], $enable_default=true, $ports=['*:80']) {
 	include apache::params
 
@@ -52,151 +52,153 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				require => Package[$apache::params::pkgname],
 				notify  => Exec["apache-graceful"]
 			}
+			
+			if ( $managed ) {
+				file { "${apache::params::rootdir}/${name}":
+					ensure  => directory,
+					owner   => root,
+					group   => root,
+					mode    => 755,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+						default               => undef
+					},
+					require => File["$apache::params::rootdir"]
+				}
 
-			file { "${apache::params::rootdir}/${name}":
-				ensure  => directory,
-				owner   => root,
-				group   => root,
-				mode    => 755,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
-					default               => undef
-				},
-				require => File["$apache::params::rootdir"]
-			}
+				file { "${apache::params::rootdir}/${name}/conf":
+					ensure  => directory,
+					owner   => $admin ? {
+						""      => $wwwuser,
+						default => $admin
+					},
+					group   => $group,
+					mode    => $mode,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_config_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
 
-			file { "${apache::params::rootdir}/${name}/conf":
-				ensure  => directory,
-				owner   => $admin ? {
-					""      => $wwwuser,
-					default => $admin
-				},
-				group   => $group,
-				mode    => $mode,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_config_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}"]
-			}
-
-			file { "${apache::params::rootdir}/${name}/htdocs":
-				ensure  => directory,
-				owner   => $wwwuser,
-				group   => $group,
-				mode    => $mode,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}"]
-			}
+				file { "${apache::params::rootdir}/${name}/htdocs":
+					ensure  => directory,
+					owner   => $wwwuser,
+					group   => $group,
+					mode    => $mode,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
  
-			if $htdocs {
-				File["${apache::params::rootdir}/${name}/htdocs"] {
-					source  => $htdocs,
-					recurse => true
-				}
-			}
-
-			if $conf {
-				File["${apache::params::rootdir}/${name}/conf"] {
-					source  => $conf,
-					recurse => true
-				}
-			}
-
-			# cgi-bin
-			file { "${name} cgi-bin directory":
-				path    => $cgipath ? {
-					false   => "${apache::params::rootdir}/${name}/cgi-bin/",
-					default => $cgipath
-				},
-				ensure  => $cgipath ? {
-					"${apache::params::rootdir}/${name}/cgi-bin/" => directory,
-					default                                    => undef # don't manage this directory unless under $root/$name
-				},
-				owner   => $wwwuser,
-				group   => $group,
-				mode    => $mode,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_sys_script_exec_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}"]
-			}
-
-			case $config_file {
-				default: {
-					File["${apache::params::confdir}/sites-available/${name}"] {
-						source => $config_file
+				if $htdocs {
+					File["${apache::params::rootdir}/${name}/htdocs"] {
+						source  => $htdocs,
+						recurse => true
 					}
 				}
-				"": {
-					if $config_content {
+
+				if $conf {
+					File["${apache::params::rootdir}/${name}/conf"] {
+						source  => $conf,
+						recurse => true
+					}
+				}
+
+				# cgi-bin
+				file { "${name} cgi-bin directory":
+					path    => $cgipath ? {
+						false   => "${apache::params::rootdir}/${name}/cgi-bin/",
+						default => $cgipath
+					},
+					ensure  => $cgipath ? {
+						"${apache::params::rootdir}/${name}/cgi-bin/" => directory,
+						default                                    => undef # don't manage this directory unless under $root/$name
+					},
+					owner   => $wwwuser,
+					group   => $group,
+					mode    => $mode,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_sys_script_exec_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
+
+				case $config_file {
+					default: {
 						File["${apache::params::confdir}/sites-available/${name}"] {
-							content => $config_content
+							source => $config_file
 						}
-					} else {
-						# default vhost template
-						File["${apache::params::confdir}/sites-available/${name}"] {
-							content => template("apache/vhost.erb")
+					}
+					"": {
+						if $config_content {
+							File["${apache::params::confdir}/sites-available/${name}"] {
+								content => $config_content
+							}
+						} else {
+							# default vhost template
+							File["${apache::params::confdir}/sites-available/${name}"] {
+								content => template("apache/vhost.erb")
+							}
 						}
 					}
 				}
-			}
 
-			# Log files
-			file {"${apache::params::rootdir}/${name}/logs":
-				ensure  => directory,
-				owner   => root,
-				group   => root,
-				mode    => 755,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}"]
-			}
+				# Log files
+				file {"${apache::params::rootdir}/${name}/logs":
+					ensure  => directory,
+					owner   => root,
+					group   => root,
+					mode    => 755,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_log_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
 
-			# We have to give log files to right people with correct rights on them.
-			# Those rights have to match those set by logrotate
-			file { [ "${apache::params::rootdir}/${name}/logs/access.log", "${apache::params::root}/${name}/logs/error.log" ] :
-				ensure  => present,
-				owner   => root,
-				group   => adm,
-				mode    => 644,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}/logs"]
-			}
+				# We have to give log files to right people with correct rights on them.
+				# Those rights have to match those set by logrotate
+				file { [ "${apache::params::rootdir}/${name}/logs/access.log", "${apache::params::root}/${name}/logs/error.log" ] :
+					ensure  => present,
+					owner   => root,
+					group   => adm,
+					mode    => 644,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_log_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}/logs"]
+				}
 
-			# Private data
-			file { "${apache::params::rootdir}/${name}/private":
-				ensure  => directory,
-				owner   => $wwwuser,
-				group   => $group,
-				mode    => $mode,
-				seltype => $operatingsystem ? {
-					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
-					default               => undef
-				},
-				require => File["${apache::params::rootdir}/${name}"]
-			}
+				# Private data
+				file { "${apache::params::rootdir}/${name}/private":
+					ensure  => directory,
+					owner   => $wwwuser,
+					group   => $group,
+					mode    => $mode,
+					seltype => $operatingsystem ? {
+						/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
+						default               => undef
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
 
-			# README file
-			file { "${apache::params::rootdir}/${name}/README":
-				ensure  => present,
-				owner   => root,
-				group   => root,
-				mode    => 644,
-				content => $readme ? {
-					false   => template("apache/README_vhost.erb"),
-					default => $readme
-				},
-				require => File["${apache::params::rootdir}/${name}"]
+				# README file
+				file { "${apache::params::rootdir}/${name}/README":
+					ensure  => present,
+					owner   => root,
+					group   => root,
+					mode    => 644,
+					content => $readme ? {
+						false   => template("apache/README_vhost.erb"),
+						default => $readme
+					},
+					require => File["${apache::params::rootdir}/${name}"]
+				}
 			}
 
 			exec { "enable vhost ${name}":
