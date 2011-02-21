@@ -33,16 +33,10 @@ Example usage:
 */
 define apache::proxypass ($ensure=present, $location="", $url="", $filename="", $vhost) {
 	include apache::params
+	include apache::module::proxy
+	include apache::module::proxy_http
 
 	$fname = regsubst($name, "\s", "_", "G")
-
-	if defined(Apache::Module["proxy"]) {} else {
-		apache::module {"proxy": }
-	}
-
-	if defined(Apache::Module["proxy_http"]) {} else {
-		apache::module {"proxy_http": }
-	}
 
 	file { "${name} proxypass on ${vhost}":
 		ensure => $ensure,

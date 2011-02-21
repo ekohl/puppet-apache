@@ -1,7 +1,9 @@
 class apache::reverseproxy {
 	include apache::params
-
-	apache::module { [ "proxy", "proxy_http", "proxy_ajp", "proxy_connect" ]: }
+	include apache::module::proxy
+	include apache::module::proxy_ajp
+	include apache::module::proxy_connect
+	include apache::module::proxy_http
 
 	file { "reverseproxy.conf":
 		ensure  => "present",

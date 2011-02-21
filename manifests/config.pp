@@ -5,6 +5,25 @@ class apache::config {
 	# Setup concat module
 	include concat::setup
 	
+	# Include default modules
+	include apache::module::alias
+	include apache::module::auth_basic
+	include apache::module::authn_file
+	include apache::module::authz_default
+	include apache::module::authz_groupfile
+	include apache::module::authz_host
+	include apache::module::authz_user
+	include apache::module::autoindex
+	include apache::module::cgi
+	include apache::module::dir
+	include apache::module::env
+	include apache::module::log_config
+	include apache::module::mime
+	include apache::module::negotiation
+	include apache::module::rewrite
+	include apache::module::setenvif
+	include apache::module::status
+	
 	File {
 		require => Class["apache::install"]
 	}
@@ -66,12 +85,6 @@ class apache::config {
 		"*:80": ensure => present
 	}
 
-	apache::module { [ "alias", "auth_basic", "authn_file", "authz_default", "authz_groupfile", "authz_host", "authz_user", "autoindex", "dir", "env", "mime", "negotiation",
-					   "rewrite", "setenvif", "status", "cgi" ]:
-		ensure => present,
-		notify => Exec["apache-graceful"]
-	}
-
 	file { "default status module configuration":
 		path    => $operatingsystem ? {
 			/(?i)(Debian|Ubuntu)/ => "${apache::params::confdir}/mods-available/status.conf",
@@ -85,7 +98,7 @@ class apache::config {
 			/(?i)(RedHat|CentOS)/ => "puppet:///modules/apache/etc/httpd/conf/status.conf"
 		},
 		notify  => Exec["apache-graceful"],
-		require => Module["status"]
+		require => Class["apache::module::status"]
 	}
 
 	file { "default virtualhost":
@@ -166,7 +179,7 @@ class apache::config {
 
 			# the following command was used to generate the content of the directory:
 			# egrep '(^|#)LoadModule' /etc/httpd/conf/httpd.conf | sed -r 's|#?(.+ (.+)_module .+)|echo "\1" > mods-available/redhat5/\2.load|' | sh
-			# ssl.load was then changed to a template (see apache-redhat-ssl.pp)
+			# ssl.load was then changed to a template (see apache/module/ssl.pp)
 			file { "${apache::params::confdir}/mods-available":
 				ensure  => directory,
 				source  => $lsbmajdistrelease ? {
@@ -177,12 +190,6 @@ class apache::config {
 				owner   => root,
 				group   => root,
 				seltype => "httpd_config_t"
-			}
-
-			# this module is statically compiled on debian and must be enabled here
-			apache::module { "log_config":
-				ensure => present,
-				notify => Exec["apache-graceful"]
 			}
 
 			# no idea why redhat choose to put this file there. apache fails if it's

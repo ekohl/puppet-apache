@@ -14,7 +14,11 @@ define apache::module ($ensure=present) {
 				},
 				unless  => "/bin/sh -c '[ -L ${apache::params::confdir}/mods-enabled/${name}.load ] && [ ${apache::params::confdir}/mods-enabled/${name}.load -ef ${apache::params::confdir}/mods-available/${name}.load ]'",
 				notify  => Class["apache::service"],
-				require => Class["apache::install"]
+				require => $operatingsystem ? {
+					/(?i)(Debian|Ubuntu)/ => Class["apache::install"],
+					/(?i)(RedHat|CentOS)/ => [ Class["apache::install"], File["${apache::params::confdir}/mods-available"] ]
+				}
+				
 			}
 		}
 		absent: {
@@ -25,7 +29,10 @@ define apache::module ($ensure=present) {
 				},
 				onlyif  => "/bin/sh -c '[ -L ${apache::params::confdir}/mods-enabled/${name}.load ] || [ -e ${apache::params::confdir}/mods-enabled/${name}.load ]'",
 				notify  => Class["apache::service"],
-				require => Class["apache::install"]
+				require => $operatingsystem ? {
+					/(?i)(Debian|Ubuntu)/ => Class["apache::install"],
+					/(?i)(RedHat|CentOS)/ => [ Class["apache::install"], File["${apache::params::confdir}/mods-available"] ]
+				}
 			}
 		}
 		default: { 

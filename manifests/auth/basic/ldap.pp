@@ -3,16 +3,10 @@ define apache::auth::basic::ldap ($ensure=present,  $authname="Private Area", $v
 								  $authLDAPDereferenceAliases=false, $authLDAPGroupAttribute=false, $authLDAPGroupAttributeIsDN=false, $authLDAPRemoteUserAttribute=false,
 								  $authLDAPRemoteUserIsDN=false, $authzLDAPAuthoritative=false, $authzRequire="valid-user") {
 	include apache::params
-
+	include apache::module::authnz_ldap
+	include apache::module::ldap
+	
 	$fname = regsubst($name, "\s", "_", "G")
-
-	if !defined(Apache::Module["ldap"]) {
-		apache::module {"ldap": }
-	}
-
-	if !defined(Apache::Module["authnz_ldap"]) {
-		apache::module {"authnz_ldap": }
-	}
 
 	file { "${apache::params::rootdir}/${vhost}/conf/auth-basic-ldap-${fname}.conf":
 		ensure  => $ensure,

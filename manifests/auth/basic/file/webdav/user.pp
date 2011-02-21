@@ -1,12 +1,9 @@
 define apache::auth::basic::file::webdav::user ($ensure=present, $authname="Private Area", $vhost, $location="/", $authUserFile=false, $rw_users="valid-user",
 												$limits='GET HEAD OPTIONS PROPFIND', $ro_users=False, $allow_anonymous=false) {
 	include apache::params
+	include apache::module::authn_file
 
 	$fname = regsubst($name, "\s", "_", "G")
-	
-	if !defined(Apache::Module["authn_file"]) {
-		apache::module {"authn_file": }
-	}
   
 	if $authUserFile {
 		$_authUserFile = $authUserFile

@@ -1,4 +1,6 @@
 class apache::userdir {
+	include apache::module::userdir
+	
 	file { "/etc/skel/public_html":
 		ensure => directory
 	}
@@ -27,10 +29,6 @@ class apache::userdir {
 		require => File["/etc/skel/public_html"],
 		ensure  => present,
 		source  => 'puppet:///modules/apache/README_userdir'
-	}
-
-	apache::module { "userdir":
-		ensure => present
 	}
 
 	# Disable global userdir activation

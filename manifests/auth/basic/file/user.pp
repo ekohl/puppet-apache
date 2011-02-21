@@ -1,11 +1,8 @@
 define apache::auth::basic::file::user ($ensure=present, $authname="Private Area", $vhost, $location="/", $authUserFile=false, $users="valid-user") {
 	include apache::params
+	include apache::module::authn_file
 
 	$fname = regsubst($name, "\s", "_", "G")
-
-	if !defined(Apache::Module["authn_file"]) {
-		apache::module {"authn_file": }
-	}
 
 	if $authUserFile {
 		$_authUserFile = $authUserFile

@@ -46,31 +46,21 @@ Example usage:
 */
 define apache::balancer ($ensure="present", $location="", $proto="http", $members=[], $standbyurl="", $params=["retry=5"], $filename="", $vhost) {
 	include apache::params
+	include apache::module::proxy
+	include apache::module::proxy_balancer
   
 	# normalise name
 	$fname = regsubst($name, "\s", "_", "G")
 
 	$balancer = "balancer://${fname}"
 
-	if !defined(Apache::Module["proxy"]) {
-		apache::module {"proxy": }
-	}
-
-	if !defined(Apache::Module["proxy_balancer"]) {
-		apache::module {"proxy_balancer": }
-	}
-
 	# ensure proxy modules are enabled
 	case $proto {
 		http: {
-			if !defined(Apache::Module["proxy_http"]) {
-				apache::module {"proxy_http": }
-			}
+				include apache::module::proxy_http
 		}
 		ajp: {
-			if !defined(Apache::Module["proxy_ajp"]) {
-				apache::module {"proxy_ajp": }
-			}
+			include apache::module::proxy_ajp
 		}
 	}
 

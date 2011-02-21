@@ -1,9 +1,6 @@
 class apache::deflate {
 	include apache::params
-
-	apache::module { "deflate":
-		ensure => present,
-	}
+	include apache::module::deflate
 
 	file { "deflate.conf":
 		ensure  => present,

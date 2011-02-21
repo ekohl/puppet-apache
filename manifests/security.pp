@@ -1,28 +1,13 @@
 class apache::security {
-	case $operatingsystem {
-		/(?i)(RedHat|CentOS)/: {
-			package { "mod_security":
-				ensure => present,
-				alias  => "apache-mod_security"
-			}
-
-			file { "/etc/httpd/conf.d/mod_security.conf":
-				ensure  => present,
-				source  => "puppet:///modules/apache/mod_security.conf",
-				require => Package["mod_security"],
-				notify  => Exec["apache-graceful"]
-			}
-		}
-		/(?i)(Debian|Ubuntu)/: {
-			package { "libapache-mod-security":
-				ensure => present,
-				alias  => "apache-mod_security"
-			}
-		}
-	}
+	include apache::module::security
+	include apache::module::unique_id
 	
-	apache::module { [ "unique_id", "security" ]:
-		ensure  => present,
-		require => Package["apache-mod_security"]
+	if ( $operatingsystem =~ /(?i)(RedHat|CentOS)/ ) {
+		file { "/etc/httpd/conf.d/mod_security.conf":
+			ensure  => present,
+			source  => "puppet:///modules/apache/mod_security.conf",
+			notify  => Class["apache::module::security"],
+			require => Package["mod_security"],
+		}
 	}
 }
