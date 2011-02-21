@@ -62,7 +62,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
 					default               => undef
 				},
-				require => File["root directory"]
+				require => File["$apache::params::rootdir"]
 			}
 
 			file { "${apache::params::root}/${name}/conf":
