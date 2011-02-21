@@ -127,26 +127,6 @@ define apache::vhost ($ensure=present, $config_file="", $managed=true, $config_c
 					require => File["${apache::params::rootdir}/${name}"]
 				}
 
-				case $config_file {
-					default: {
-						File["${apache::params::confdir}/sites-available/${name}"] {
-							source => $config_file
-						}
-					}
-					"": {
-						if $config_content {
-							File["${apache::params::confdir}/sites-available/${name}"] {
-								content => $config_content
-							}
-						} else {
-							# default vhost template
-							File["${apache::params::confdir}/sites-available/${name}"] {
-								content => template("apache/vhost.erb")
-							}
-						}
-					}
-				}
-
 				# Log files
 				file {"${apache::params::rootdir}/${name}/logs":
 					ensure  => directory,
@@ -198,6 +178,26 @@ define apache::vhost ($ensure=present, $config_file="", $managed=true, $config_c
 						default => $readme
 					},
 					require => File["${apache::params::rootdir}/${name}"]
+				}
+			}	
+
+			case $config_file {
+				default: {
+					File["${apache::params::confdir}/sites-available/${name}"] {
+						source => $config_file
+					}
+				}
+				"": {
+					if $config_content {
+						File["${apache::params::confdir}/sites-available/${name}"] {
+							content => $config_content
+						}
+					} else {
+						# default vhost template
+						File["${apache::params::confdir}/sites-available/${name}"] {
+							content => template("apache/vhost.erb")
+						}
+					}
 				}
 			}
 
