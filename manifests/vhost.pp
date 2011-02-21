@@ -207,14 +207,18 @@ define apache::vhost ($ensure=present, $config_file="", $managed=true, $config_c
 					default               => "/usr/sbin/a2ensite ${name}"
 				},
 				notify  => Exec["apache-graceful"],
-				require => [$operatingsystem ? {
+				require => [ $operatingsystem ? {
 					/(?i)(RedHat|CentOS)/ => File["/usr/local/sbin/a2ensite"],
 					default               => Package[$apache::params::pkgname]
-				},
-					File["${apache::params::confdir}/sites-available/${name}"],
-					File["${apache::params::rootdir}/${name}/htdocs"],
-					File["${apache::params::rootdir}/${name}/logs"],
-          			File["${apache::params::rootdir}/${name}/conf"] ],
+					},
+					$managed ? {
+						false   => File["${apache::params::confdir}/sites-available/${name}"],
+						default => [ File["${apache::params::confdir}/sites-available/${name}"],
+								   File["${apache::params::rootdir}/${name}/htdocs"],
+								   File["${apache::params::rootdir}/${name}/logs"],
+	          					   File["${apache::params::rootdir}/${name}/conf"] ]
+					}
+				],
 				unless  => "/bin/sh -c '[ -L ${apache::params::confdir}/sites-enabled/${name} ] && [ ${apache::params::confdir}/sites-enabled/${name} -ef ${apache::params::confdir}/sites-available/${name} ]'"
 			}
 		}
