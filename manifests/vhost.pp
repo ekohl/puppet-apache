@@ -8,7 +8,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 	}
 
 	# used in ERB templates
-	$wwwroot = $apache::params::root
+	$wwwroot = $apache::params::rootdir
 
 	$documentroot = $docroot ? {
 		false   => "${wwwroot}/${name}/htdocs",
@@ -25,14 +25,14 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 	if $enable_default == true {
 		exec { "enable default virtual host from ${name}":
 			command => "a2ensite default",
-			unless  => "test -L ${apache::params::conf}/sites-enabled/000-default",
+			unless  => "test -L ${apache::params::confdir}/sites-enabled/000-default",
 			notify  => Exec["apache-graceful"],
 			require => Package[$apache::params::pkgname]
 		}
 	} else {
 		exec { "disable default virtual host from ${name}":
 			command => "a2dissite default",
-			onlyif  => "test -L ${apache::params::conf}/sites-enabled/000-default",
+			onlyif  => "test -L ${apache::params::confdir}/sites-enabled/000-default",
 			notify  => Exec["apache-graceful"],
 			require => Package[$apache::params::pkgname]
 		}
@@ -40,7 +40,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 
 	case $ensure {
 		present: {
-			file { "${apache::params::conf}/sites-available/${name}":
+			file { "${apache::params::confdir}/sites-available/${name}":
 				ensure  => present,
 				owner   => root,
 				group   => root,
@@ -53,7 +53,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				notify  => Exec["apache-graceful"]
 			}
 
-			file { "${apache::params::root}/${name}":
+			file { "${apache::params::rootdir}/${name}":
 				ensure  => directory,
 				owner   => root,
 				group   => root,
@@ -65,7 +65,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				require => File["$apache::params::rootdir"]
 			}
 
-			file { "${apache::params::root}/${name}/conf":
+			file { "${apache::params::rootdir}/${name}/conf":
 				ensure  => directory,
 				owner   => $admin ? {
 					""      => $wwwuser,
@@ -77,10 +77,10 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
 
-			file { "${apache::params::root}/${name}/htdocs":
+			file { "${apache::params::rootdir}/${name}/htdocs":
 				ensure  => directory,
 				owner   => $wwwuser,
 				group   => $group,
@@ -89,18 +89,18 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
  
 			if $htdocs {
-				File["${apache::params::root}/${name}/htdocs"] {
+				File["${apache::params::rootdir}/${name}/htdocs"] {
 					source  => $htdocs,
 					recurse => true
 				}
 			}
 
 			if $conf {
-				File["${apache::params::root}/${name}/conf"] {
+				File["${apache::params::rootdir}/${name}/conf"] {
 					source  => $conf,
 					recurse => true
 				}
@@ -109,11 +109,11 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 			# cgi-bin
 			file { "${name} cgi-bin directory":
 				path    => $cgipath ? {
-					false   => "${apache::params::root}/${name}/cgi-bin/",
+					false   => "${apache::params::rootdir}/${name}/cgi-bin/",
 					default => $cgipath
 				},
 				ensure  => $cgipath ? {
-					"${apache::params::root}/${name}/cgi-bin/" => directory,
+					"${apache::params::rootdir}/${name}/cgi-bin/" => directory,
 					default                                    => undef # don't manage this directory unless under $root/$name
 				},
 				owner   => $wwwuser,
@@ -123,23 +123,23 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_sys_script_exec_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
 
 			case $config_file {
 				default: {
-					File["${apache::params::conf}/sites-available/${name}"] {
+					File["${apache::params::confdir}/sites-available/${name}"] {
 						source => $config_file
 					}
 				}
 				"": {
 					if $config_content {
-						File["${apache::params::conf}/sites-available/${name}"] {
+						File["${apache::params::confdir}/sites-available/${name}"] {
 							content => $config_content
 						}
 					} else {
 						# default vhost template
-						File["${apache::params::conf}/sites-available/${name}"] {
+						File["${apache::params::confdir}/sites-available/${name}"] {
 							content => template("apache/vhost.erb")
 						}
 					}
@@ -147,7 +147,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 			}
 
 			# Log files
-			file {"${apache::params::root}/${name}/logs":
+			file {"${apache::params::rootdir}/${name}/logs":
 				ensure  => directory,
 				owner   => root,
 				group   => root,
@@ -156,12 +156,12 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
 
 			# We have to give log files to right people with correct rights on them.
 			# Those rights have to match those set by logrotate
-			file { [ "${apache::params::root}/${name}/logs/access.log", "${apache::params::root}/${name}/logs/error.log" ] :
+			file { [ "${apache::params::rootdir}/${name}/logs/access.log", "${apache::params::root}/${name}/logs/error.log" ] :
 				ensure  => present,
 				owner   => root,
 				group   => adm,
@@ -170,11 +170,11 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_log_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}/logs"]
+				require => File["${apache::params::rootdir}/${name}/logs"]
 			}
 
 			# Private data
-			file { "${apache::params::root}/${name}/private":
+			file { "${apache::params::rootdir}/${name}/private":
 				ensure  => directory,
 				owner   => $wwwuser,
 				group   => $group,
@@ -183,11 +183,11 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_sys_content_t",
 					default               => undef
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
 
 			# README file
-			file { "${apache::params::root}/${name}/README":
+			file { "${apache::params::rootdir}/${name}/README":
 				ensure  => present,
 				owner   => root,
 				group   => root,
@@ -196,7 +196,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					false   => template("apache/README_vhost.erb"),
 					default => $readme
 				},
-				require => File["${apache::params::root}/${name}"]
+				require => File["${apache::params::rootdir}/${name}"]
 			}
 
 			exec { "enable vhost ${name}":
@@ -209,27 +209,27 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => File["/usr/local/sbin/a2ensite"],
 					default               => Package[$apache::params::pkgname]
 				},
-					File["${apache::params::conf}/sites-available/${name}"],
-					File["${apache::params::root}/${name}/htdocs"],
-					File["${apache::params::root}/${name}/logs"],
-          			File["${apache::params::root}/${name}/conf"] ],
-				unless  => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
+					File["${apache::params::confdir}/sites-available/${name}"],
+					File["${apache::params::rootdir}/${name}/htdocs"],
+					File["${apache::params::rootdir}/${name}/logs"],
+          			File["${apache::params::rootdir}/${name}/conf"] ],
+				unless  => "/bin/sh -c '[ -L ${apache::params::confdir}/sites-enabled/${name} ] && [ ${apache::params::confdir}/sites-enabled/${name} -ef ${apache::params::confdir}/sites-available/${name} ]'"
 			}
 		}
 		absent:{
-			file { "${apache::params::conf}/sites-enabled/${name}":
+			file { "${apache::params::confdir}/sites-enabled/${name}":
 				ensure  => absent,
 				require => Exec["disable vhost ${name}"]
 			}
 
-			file { "${apache::params::conf}/sites-available/${name}":
+			file { "${apache::params::confdir}/sites-available/${name}":
 				ensure  => absent,
 				require => Exec["disable vhost ${name}"]
 			}
 
-			exec { "remove ${apache::params::root}/${name}":
-				command => "rm -rf ${apache::params::root}/${name}",
-				onlyif  => "test -d ${apache::params::root}/${name}",
+			exec { "remove ${apache::params::rootdir}/${name}":
+				command => "rm -rf ${apache::params::rootdir}/${name}",
+				onlyif  => "test -d ${apache::params::rootdir}/${name}",
 				require => Exec["disable vhost ${name}"]
 			}
 
@@ -243,7 +243,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/  => File["/usr/local/sbin/a2ensite"],
 					default                => Package[$apache::params::pkgname]
 				},
-				onlyif => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
+				onlyif => "/bin/sh -c '[ -L ${apache::params::confdir}/sites-enabled/${name} ] && [ ${apache::params::confdir}/sites-enabled/${name} -ef ${apache::params::confdir}/sites-available/${name} ]'"
 			}
 		}
 		disabled: {
@@ -251,7 +251,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				command => "a2dissite ${name}",
 				notify  => Exec["apache-graceful"],
 				require => Package[$apache::params::pkgname],
-				onlyif  => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
+				onlyif  => "/bin/sh -c '[ -L ${apache::params::confdir}/sites-enabled/${name} ] && [ ${apache::params::confdir}/sites-enabled/${name} -ef ${apache::params::confdir}/sites-available/${name} ]'"
 			}
 
 			file { "${apache::params::conf}/sites-enabled/${name}":
