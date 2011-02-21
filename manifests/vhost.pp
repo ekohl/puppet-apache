@@ -49,7 +49,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 					/(?i)(RedHat|CentOS)/ => "httpd_config_t",
 					default               => undef
 				},
-				require => Package[$apache::params::pkg],
+				require => Package[$apache::params::pkgname],
 				notify  => Exec["apache-graceful"]
 			}
 
@@ -207,7 +207,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				notify  => Exec["apache-graceful"],
 				require => [$operatingsystem ? {
 					/(?i)(RedHat|CentOS)/ => File["/usr/local/sbin/a2ensite"],
-					default               => Package[$apache::params::pkg]
+					default               => Package[$apache::params::pkgname]
 				},
 					File["${apache::params::conf}/sites-available/${name}"],
 					File["${apache::params::root}/${name}/htdocs"],
@@ -241,7 +241,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 				notify  => Exec["apache-graceful"],
 				require => $operatingsystem ? {
 					/(?i)(RedHat|CentOS)/  => File["/usr/local/sbin/a2ensite"],
-					default                => Package[$apache::params::pkg]
+					default                => Package[$apache::params::pkgname]
 				},
 				onlyif => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
 			}
@@ -250,7 +250,7 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 			exec { "disable vhost ${name}":
 				command => "a2dissite ${name}",
 				notify  => Exec["apache-graceful"],
-				require => Package[$apache::params::pkg],
+				require => Package[$apache::params::pkgname],
 				onlyif  => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'"
 			}
 
