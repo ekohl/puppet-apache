@@ -27,14 +27,14 @@ define apache::vhost ($ensure=present, $config_file="", $config_content=false, $
 			command => "a2ensite default",
 			unless  => "test -L ${apache::params::conf}/sites-enabled/000-default",
 			notify  => Exec["apache-graceful"],
-			require => Package["apache"]
+			require => Package[$apache::params::pkgname]
 		}
 	} else {
 		exec { "disable default virtual host from ${name}":
 			command => "a2dissite default",
 			onlyif  => "test -L ${apache::params::conf}/sites-enabled/000-default",
 			notify  => Exec["apache-graceful"],
-			require => Package["apache"]
+			require => Package[$apache::params::pkgname]
 		}
 	}
 
