@@ -12,7 +12,7 @@ define apache::reverseproxy::http ($ensure = present, $vhost, $location = '/', $
 			/(?i)(RedHat|CentOS)/ => 'httpd_config_t',
 			default               => undef
 		},
-    notify  => Exec['apache-graceful'],
+		notify  => Exec['apache-graceful'],
 		require => [ Class['apache::module::proxy'], Class['apache::module::proxy_http'] ]
   }
 }
