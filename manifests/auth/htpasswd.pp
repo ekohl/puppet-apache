@@ -24,14 +24,14 @@ define apache::auth::htpasswd ($ensure=present, $vhost=false, $userFileLocation=
 			}
 
 			if $cryptPassword {
-				exec { "! test -f $_authUserFile && OPT='-c'; htpasswd -bp \$OPT $_authUserFile $username '$cryptPassword'":
+				exec { "test ! -f $_authUserFile && OPT='-c'; htpasswd -bp \$OPT $_authUserFile $username '$cryptPassword'":
 					unless  => "grep -q ${username}:${cryptPassword} $_authUserFile",
 					require => File[$_userFileLocation]
 				}
 			}
 
 			if $clearPassword {
-				exec { "! test -f $_authUserFile && OPT='-c'; htpasswd -b \$OPT $_authUserFile $username $clearPassword":
+				exec { "test ! -f $_authUserFile && OPT='-c'; htpasswd -b \$OPT $_authUserFile $username $clearPassword":
 					unless  => "grep $username $_authUserFile && grep ${username}:\$(mkpasswd -S \$(grep $username $_authUserFile |cut -d : -f 2 |cut -c-2) $clearPassword) $_authUserFile",
 					require => File[$_userFileLocation]
 				}
