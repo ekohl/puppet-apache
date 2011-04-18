@@ -60,6 +60,7 @@ Parameters:
   reachable. Defaults to "*:80".
 - *sslports*: array specifying the ports on which the SSL vhost will be
   reachable. Defaults to "*:443".
+- *accesslog_format*: format string for access logs. Defaults to "combined".
 
 Requires:
 - Class["apache-ssl"]
@@ -93,7 +94,7 @@ Example usage:
 */
 define apache::vhost::ssl ($ensure=present, $config_file="", $managed=true, $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
 						  $user="", $admin=$admin, $group="root", $mode=2570, $aliases=[], $ip_address="*", $cert=false, $certkey=false, $cacert=false, $certchain=false,
-						  $certcn=false, $days="3650", $publish_csr=false, $sslonly=false, $enable_default=true, $ports=['*:80'], $sslports=['*:443']) {
+						  $certcn=false, $days="3650", $publish_csr=false, $sslonly=false, $enable_default=true, $ports=['*:80'], $sslports=['*:443'], $accesslog_format="combined") {
 	include apache::params
 
 	# these 2 values are required to generate a valid SSL certificate.
@@ -140,27 +141,28 @@ define apache::vhost::ssl ($ensure=present, $config_file="", $managed=true, $con
 
 	# call parent definition to actually do the virtualhost setup.
 	apache::vhost {$name:
-		ensure         => $ensure,
-		config_file    => $config_file,
-		managed        => $managed,
-		config_content => $config_content ? {
+		ensure           => $ensure,
+		config_file      => $config_file,
+		managed          => $managed,
+		config_content   => $config_content ? {
 			false   => $sslonly ? {
 				true    => template("apache/vhost/ssl.erb"),
 				default => template("apache/vhost.erb", "apache/vhost/ssl.erb")
 			},
 			default => $config_content
 		},
-		aliases        => $aliases,
-		htdocs         => $htdocs,
-		conf           => $conf,
-		readme         => $readme,
-		docroot        => $docroot,
-		user           => $wwwuser,
-		admin          => $admin,
-		group          => $group,
-		mode           => $mode,
-		enable_default => $enable_default,
-		ports          => $ports
+		aliases          => $aliases,
+		htdocs           => $htdocs,
+		conf             => $conf,
+		readme           => $readme,
+		docroot          => $docroot,
+		user             => $wwwuser,
+		admin            => $admin,
+		group            => $group,
+		mode             => $mode,
+		enable_default   => $enable_default,
+		ports            => $ports,
+		accesslog_format => $accesslog_format,
 	}
 
 	if $ensure == "present" {

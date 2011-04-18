@@ -5,11 +5,9 @@ class apache::administration {
 		ensure => present
 	}
 
-	# This requires /etc/sudoers to be already setup to use with concat module
-	# TODO: move /etc/sudoers concat setup to a common module
-	concat::fragment { "sudoers.apache":
-		target  => "/etc/sudoers",
-		order   => 20,
+	# This requires the sudo module to be included somewhere in your setup
+	sudo::directive { "sudoers.apache":
+		ensure  => present,
 		content => template("apache/sudoers.erb"),
 		require => Group["apache-admin"]
 	}

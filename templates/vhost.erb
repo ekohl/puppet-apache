@@ -11,7 +11,7 @@
   LogLevel warn
 
   ErrorLog <%= scope.lookupvar('apache::params::rootdir') %>/<%= name %>/logs/error.log
-  CustomLog <%= scope.lookupvar('apache::params::rootdir') %>/<%= name %>/logs/access.log combined
+  CustomLog <%= scope.lookupvar('apache::params::rootdir') %>/<%= name %>/logs/access.log "<%= accesslog_format %>"
 
   Include <%= scope.lookupvar('apache::params::rootdir') %>/<%= name%>/conf/*.conf
 

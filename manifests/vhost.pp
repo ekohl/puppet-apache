@@ -1,5 +1,5 @@
 define apache::vhost ($ensure=present, $config_file="", $managed=true, $config_content=false, $htdocs=false, $conf=false, $readme=false, $docroot=false, $cgibin=true,
-					  $user="", $admin="", $group="root", $mode=2570, $aliases=[], $enable_default=true, $ports=['*:80']) {
+					  $user="", $admin="", $group="root", $mode=2570, $aliases=[], $enable_default=true, $ports=['*:80'], $accesslog_format="combined") {
 	include apache::params
 
 	$wwwuser = $user ? {
