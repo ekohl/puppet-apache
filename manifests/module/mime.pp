@@ -2,7 +2,7 @@
 #
 #
 class apache::module::mime ($ensure = present) {
-	apache::module { 'mime"':
+	apache::module { 'mime':
 		ensure => $ensure,
 	}
 }
