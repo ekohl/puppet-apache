@@ -1,14 +1,14 @@
-define apache::env ($ensure = present, $vhost, $envhash) {
+define apache::env ($vhost,
+										$envhash,
+										$ensure = present) {
   include apache::params
-	$fname = regsubst($name, "\s", "_", "G")
+
+	$fname = regsubst($name, '\s', '_', 'G')
 
   file { "${apache::params::root}/${vhost}/conf/env-${fname}.conf":
-		ensure => $ensure,
+		ensure  => $ensure,
 		content => template('apache/env.erb'),
-		seltype => $operatingsystem ? {
-			/(?i)(RedHat|CentOS)/ => 'httpd_config_t',
-			default               => undef,
-		},
-		notify => Exec['apache-graceful']
+		seltype => $apache::params::seltype,
+		notify  => Exec['apache-graceful'],
   }
 }

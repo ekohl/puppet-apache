@@ -1,7 +1,13 @@
 class apache::params {
+	# TODO: refactor this var to a common module and make other module use it
+	$os_suffix = $operatingsystem ? {
+		/(?i)(Debian|Ubuntu)/ => 'debian',
+		/(?i)(RedHat|CentOS)/ => 'redhat',
+	}
+	
 	$basename = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'apache2',
-		/(?i)(RedHat|CentOS)/ => 'httpd'
+		/(?i)(RedHat|CentOS)/ => 'httpd',
 	}
 	
 	$pkgname     = $basename
@@ -9,53 +15,58 @@ class apache::params {
 
 	$rootdir = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/var/www',
-		/(?i)(RedHat|CentOS)/ => '/var/www/vhosts'
+		/(?i)(RedHat|CentOS)/ => '/var/www/vhosts',
 	}
 
 	$user = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'www-data',
-		/(?i)(RedHat|CentOS)/ => 'apache'
+		/(?i)(RedHat|CentOS)/ => 'apache',
 		
 	}
 	
 	$group = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'www-data',
-		/(?i)(RedHat|CentOS)/ => 'apache'
+		/(?i)(RedHat|CentOS)/ => 'apache',
 		
 	}
 
 	$confdir = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/etc/apache2',
-		/(?i)(RedHat|CentOS)/ => '/etc/httpd'
+		/(?i)(RedHat|CentOS)/ => '/etc/httpd',
 	}
 
 	$cgidir = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/usr/lib/cgi-bin',
-		/(?i)(RedHat|CentOS)/ => '/var/www/cgi-bin'
+		/(?i)(RedHat|CentOS)/ => '/var/www/cgi-bin',
 	}
 
 	$logdir = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/var/log/apache2',
-		/(?i)(RedHat|CentOS)/ => '/var/log/httpd'
+		/(?i)(RedHat|CentOS)/ => '/var/log/httpd',
 	}
 	
 	$apachectl = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'apache2ctl',
-		/(?i)(RedHat|CentOS)/ => 'apachectl'
+		/(?i)(RedHat|CentOS)/ => 'apachectl',
+	}
+	
+	$seltype = $operatingsystem ? {
+		/(?i)(RedHat|CentOS)/ => 'httpd_config_t',
+		default               => undef,
 	}
 	
 	$distro_specific_sudo = $operatingsystem ? {
-		/(?i)(Debian|Ubuntu)/ => "/usr/sbin/apache2ctl",
-		/(?i)(RedHat|CentOS)/ => "/usr/sbin/apachectl, /sbin/service ${basename}"
+		/(?i)(Debian|Ubuntu)/ => '/usr/sbin/apache2ctl',
+		/(?i)(RedHat|CentOS)/ => '/usr/sbin/apachectl, /sbin/service httpd',
 	}
 	
 	$sudo_admin_user = $apache_sudo_admin_user ? {
 		""      => false,
-		default => $apache_sudo_admin_user
+		default => $apache_sudo_admin_user,
 	}
 	
 	$sudo_admin_cmnd = $apache_sudo_admin_cmnd ? {
 		""      => "/etc/init.d/${pkgname}, /bin/su ${user}, /bin/su - ${user}, ${distro_specific_sudo}",
-		default => $apache_sudo_admin_cmnd
+		default => $apache_sudo_admin_cmnd,
 	}
 }

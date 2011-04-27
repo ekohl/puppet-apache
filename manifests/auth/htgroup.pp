@@ -1,4 +1,9 @@
-define apache::auth::htgroup ( $ensure=present, $vhost=false, $groupFileLocation=false, $groupFileName="htgroup", $groupname, $members) {
+define apache::auth::htgroup ($groupname,
+															$members,
+															$ensure            = present,
+															$vhost             = false,
+															$groupFileLocation = false,
+															$groupFileName     = 'htgroup') {
 	include apache::params
 
 	if $groupFileLocation {
@@ -7,7 +12,7 @@ define apache::auth::htgroup ( $ensure=present, $vhost=false, $groupFileLocation
 		if $vhost {
 			$_groupFileLocation = "${apache::params::rootdir}/${vhost}/private"
 		} else {
-			fail("Parameter vhost is required if groupFileLocation is not specified!")
+			fail('Parameter vhost is required if groupFileLocation is not specified!')
 		}  
 	}
 
@@ -15,22 +20,22 @@ define apache::auth::htgroup ( $ensure=present, $vhost=false, $groupFileLocation
   
 	case $ensure {
 		present: {
-			exec { "! test -f $_authGroupFile && OPT='-c'; htgroup \$OPT $_authGroupFile $groupname $members":
+			exec { "! test -f ${_authGroupFile} && OPT='-c'; htgroup \$OPT ${_authGroupFile} ${groupname} ${members}":
 				unless  => "grep -qi '^${groupname}: ${members}$' ${_authGroupFile}",
-				require => File[$_groupFileLocation]
+				require => File[$_groupFileLocation],
 			}
 		}
 
 		absent: {
-			exec { "htgroup -D $_authGroupFile $groupname":
-				onlyif => "grep -q $groupname $_authGroupFile",
-				notify => Exec["delete $_authGroupFile after remove $groupname"],
+			exec { "htgroup -D ${_authGroupFile} ${groupname}":
+				onlyif => "grep -q ${groupname} $_authGroupFile",
+				notify => Exec["delete ${_authGroupFile} after remove ${groupname}"],
 			}
 
-			exec { "delete $_authGroupFile after remove $groupname":
-				command     => "rm -f $_authGroupFile",
-				onlyif      => "wc -l $_authGroupFile |grep -q 0",
-				refreshonly => true
+			exec { "delete ${_authGroupFile} after remove ${groupname}":
+				command     => "rm -f ${_authGroupFile}",
+				onlyif      => "wc -l ${_authGroupFile} |grep -q 0",
+				refreshonly => true,
 			} 
 		}
  	}

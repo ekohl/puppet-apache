@@ -1,39 +1,39 @@
 class apache::userdir {
 	include apache::module::userdir
 	
-	file { "/etc/skel/public_html":
-		ensure => directory
+	file { '/etc/skel/public_html':
+		ensure => directory,
 	}
 
-	file { "/etc/skel/public_html/htdocs":
+	file { '/etc/skel/public_html/htdocs':
 		ensure  => directory,
-		require => File["/etc/skel/public_html"]
+		require => File['/etc/skel/public_html'],
 	}
 
-	file { "/etc/skel/public_html/conf":
-		require => File["/etc/skel/public_html"],
-		ensure  => directory
+	file { '/etc/skel/public_html/conf':
+		ensure  => directory,
+		require => File['/etc/skel/public_html'],
 	}
 
-	file { "/etc/skel/public_html/cgi-bin":
-		require => File["/etc/skel/public_html"],
-		ensure  => directory
+	file { '/etc/skel/public_html/cgi-bin':
+		ensure  => directory,
+		require => File['/etc/skel/public_html'],
 	}
 
-	file { "/etc/skel/public_html/private":
-		require => File["/etc/skel/public_html"],
-		ensure => directory
+	file { '/etc/skel/public_html/private':
+		ensure => directory,
+		require => File['/etc/skel/public_html'],
 	}
 
-	file { "/etc/skel/public_html/README":
-		require => File["/etc/skel/public_html"],
+	file { '/etc/skel/public_html/README':
 		ensure  => present,
-		source  => 'puppet:///modules/apache/README_userdir'
+		require => File['/etc/skel/public_html'],
+		source  => 'puppet:///modules/apache/README_userdir',
 	}
 
 	# Disable global userdir activation
-	file { "/etc/apache2/mods-enabled/userdir.conf":
+	file { '/etc/apache2/mods-enabled/userdir.conf':
 		ensure => absent,
-		notify => Exec["apache-graceful"]
+		notify => Exec['apache-graceful'],
 	}
 }
