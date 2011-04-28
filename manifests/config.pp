@@ -74,7 +74,7 @@ class apache::config {
 	concat::fragment { 'apache-ports.conf-base':
 		target  => "${apache::params::confdir}/ports.conf",
 		order   => 10,
-		content => '#file managed by puppet\n',
+		content => "#file managed by puppet\n",
 	}
 
 	apache::listen { '80':
