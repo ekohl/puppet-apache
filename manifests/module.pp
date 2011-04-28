@@ -9,7 +9,7 @@ define apache::module ($ensure = present) {
 		present: {
 			exec { "a2enmod ${name}":
 				command => $operatingsystem ? {
-					/(?i)(Debian|Ubuntu)/ => "/usr//sbin/a2enmod ${name}",
+					/(?i)(Debian|Ubuntu)/ => "/usr/sbin/a2enmod ${name}",
 					/(?i)(RedHat|CentOS)/ => "/usr/local/sbin/a2enmod ${name}",
 				},
 				unless  => "/bin/sh -c '[ -L ${apache::params::confdir}/mods-enabled/${name}.load ] && [ ${apache::params::confdir}/mods-enabled/${name}.load -ef ${apache::params::confdir}/mods-available/${name}.load ]'",
