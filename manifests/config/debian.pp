@@ -21,7 +21,7 @@ class apache::config::debian {
 		owner   => 'root',
 		group   => 'root',
 		mode    => '0644',
-		content => '<html><body><h1>It works!</h1></body></html>\n',
+		content => "<html><body><h1>It works!</h1></body></html>\n",
 	}
 
 	file { "${apache::params::confdir}/conf.d/servername.conf":
