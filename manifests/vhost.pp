@@ -137,7 +137,7 @@ define apache::vhost ($ensure           = present,
 				}
 
 				# Log files
-				file {"${apache::params::rootdir}/${name}/logs":
+				file { "${apache::params::rootdir}/${name}/logs":
 					ensure  => directory,
 					owner   => 'root',
 					group   => 'root',
@@ -151,7 +151,7 @@ define apache::vhost ($ensure           = present,
 
 				# We have to give log files to right people with correct rights on them.
 				# Those rights have to match those set by logrotate
-				file { [ "${apache::params::rootdir}/${name}/logs/access.log", "${apache::params::root}/${name}/logs/error.log" ] :
+				file { [ "${apache::params::rootdir}/${name}/logs/access.log", "${apache::params::rootdir}/${name}/logs/error.log" ] :
 					ensure  => present,
 					owner   => 'root',
 					group   => 'adm',
