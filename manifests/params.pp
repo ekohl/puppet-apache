@@ -21,13 +21,16 @@ class apache::params {
 	$user = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'www-data',
 		/(?i)(RedHat|CentOS)/ => 'apache',
-		
+	}
+	
+	$user_shell = $apache_user_shell ? {
+		''      => '/bin/sh',
+		default => $apache_user_shell,
 	}
 	
 	$group = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => 'www-data',
 		/(?i)(RedHat|CentOS)/ => 'apache',
-		
 	}
 
 	$confdir = $operatingsystem ? {

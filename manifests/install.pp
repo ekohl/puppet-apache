@@ -14,7 +14,7 @@ class apache::install {
 	
 	user { $apache::params::user:
 		ensure  => present,
-		shell   => '/bin/sh',
+		shell   => $apache::params::user_shell,
 		require => Package[$apache::params::pkgname],
 	}
 
