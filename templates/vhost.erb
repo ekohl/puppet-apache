@@ -8,6 +8,13 @@
 
   DocumentRoot <%= documentroot %>
 
+	<Directory <%= scope.lookupvar('apache::params::rootdir') %>/<%= name %>/htdocs>
+		Options -Indexes FollowSymLinks
+		AllowOverride All
+		Order allow,deny
+		Allow from all
+	</Directory>
+		
   LogLevel warn
 
   ErrorLog <%= scope.lookupvar('apache::params::rootdir') %>/<%= name %>/logs/error.log
