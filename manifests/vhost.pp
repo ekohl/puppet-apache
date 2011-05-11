@@ -68,8 +68,8 @@ define apache::vhost ($ensure           = present,
 			if ( $managed ) {
 				file { "${apache::params::rootdir}/${name}":
 					ensure  => directory,
-					owner   => 'root',
-					group   => 'root',
+					owner   => $wwwuser,
+					group   => $group,
 					mode    => '0755',
 					seltype => $operatingsystem ? {
 						/(?i)(RedHat|CentOS)/ => 'httpd_sys_content_t',
