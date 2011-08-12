@@ -13,9 +13,12 @@ class apache::params {
 	$pkgname     = $basename
 	$servicename = $basename
 
-	$rootdir = $operatingsystem ? {
-		/(?i)(Debian|Ubuntu)/ => '/var/www',
-		/(?i)(RedHat|CentOS)/ => '/var/www/vhosts',
+	$rootdir = $apache_rootdir ? {
+		'' => $operatingsystem ? {
+			/(?i)(Debian|Ubuntu)/ => '/var/www',
+			/(?i)(RedHat|CentOS)/ => '/var/www/vhosts',
+		},
+		default => $apache_rootdir,
 	}
 
 	$user = $operatingsystem ? {
