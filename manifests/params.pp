@@ -61,6 +61,12 @@ class apache::params {
 		default               => undef,
 	}
 	
+	# This is for Debian/Ubuntu only
+	$mpm_package = $apache_mpm_type ? {
+		''      => 'apache2-mpm-prefork',
+		default => "apache2-mpm-${apache_mpm_type}",
+	}
+	
 	$distro_specific_sudo = $operatingsystem ? {
 		/(?i)(Debian|Ubuntu)/ => '/usr/sbin/apache2ctl',
 		/(?i)(RedHat|CentOS)/ => '/usr/sbin/apachectl, /sbin/service httpd',
